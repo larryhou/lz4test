@@ -14,36 +14,57 @@
 #include <string>
 #include <vector>
 
-bool lz4test::compress(std::istream &input, std::ostream &output)
+double lz4t_progress = 0.0f;
+
+bool lz4t_decompress(const char* data, int csize, char* buf, int usize);
+bool lz4t_compress(const char* data, int usize, char* buf, int& csize);
+
+bool lz4t_compress(const char* filename, const char *savename)
 {
+    std::fstream input;
+    input.open(filename, std::ios::in);
+    if (!input.good()) { return false; }
+    
+    std::fstream output;
+    output.open(savename, std::ios::out);
+    if (!output.good()) { return false; }
+    
     input.seekg(0, std::ios::end);
-    auto remain = input.tellg();
+    auto remain = (int)input.tellg();
     input.seekg(0);
     
     char dat[FILE_BLOCK_SIZE];
     char buf[FILE_BLOCK_SIZE];
     
-    std::vector<FileBlock> metadata;
+    std::vector<LZ4TFileBlock> metadata;
     
     int offset = 0;
     output.write((const char*)&offset, sizeof(int));
     output.write((const char*)&offset, sizeof(int));
+    
+    int progress = 0;
+    
+    auto block_count = (remain + FILE_BLOCK_SIZE - 1) / FILE_BLOCK_SIZE;
+    auto total_bytes = block_count * sizeof(LZ4TFileBlock) + remain;
     
     while (remain)
     {
         auto size = std::min<int>((int)remain, FILE_BLOCK_SIZE);
         input.read(dat, size);
         
-        FileBlock page{size, 0};
-        if (!compress(dat, size, buf, page.csize)) { return false; }
+        LZ4TFileBlock page{size, 0};
+        if (!lz4t_compress(dat, size, buf, page.csize)) { return false; }
         output.write(buf, page.csize);
         metadata.push_back(page);
         remain -= size;
+        
+        progress += size;
+        lz4t_progress = (double)progress / (double)total_bytes;
     }
     
     offset = (int)output.tellp();
     
-    int usize = (int)(sizeof(FileBlock) * metadata.size());
+    int usize = (int)(sizeof(LZ4TFileBlock) * metadata.size());
     int csize = 0;
     
     output.write((const char*)&usize, sizeof(int));
@@ -51,8 +72,11 @@ bool lz4test::compress(std::istream &input, std::ostream &output)
     
     {
         char buf[usize];
-        if (!compress((const char*)metadata.data(), usize, buf, csize)) { return false; }
+        if (!lz4t_compress((const char*)metadata.data(), usize, buf, csize)) { return false; }
         output.write(buf, csize);
+        
+        progress += usize;
+        lz4t_progress = (double)progress / (double)total_bytes;
     }
     
     auto filesize = (int)output.tellp();
@@ -68,13 +92,24 @@ bool lz4test::compress(std::istream &input, std::ostream &output)
     return true;
 }
 
-bool lz4test::decompress(std::istream &input, std::ostream &output)
+bool lz4t_decompress(const char* filename, const char *savename)
 {
+    std::fstream input;
+    input.open(filename, std::ios::in);
+    if (!input.good()) { return false; }
+    
+    std::fstream output;
+    output.open(savename, std::ios::out);
+    if (!output.good()) { return false; }
+    
     int filesize = 0, offset = 0;
     input.read((char *)&filesize, sizeof(int));
     input.read((char *)&offset, sizeof(int));
     
-    std::vector<FileBlock> metadata;
+    std::vector<LZ4TFileBlock> metadata;
+    
+    int progress = sizeof(int) * 4;
+    lz4t_progress = (double)progress / (double)filesize;
     
     {
         input.seekg(offset);
@@ -86,10 +121,13 @@ bool lz4test::decompress(std::istream &input, std::ostream &output)
         char buf[usize];
         input.read(dat, csize);
         
-        if (!decompress(dat, csize, buf, usize)) { return false; }
+        if (!lz4t_decompress(dat, csize, buf, usize)) { return false; }
         
-        metadata.resize(usize / sizeof(FileBlock));
+        metadata.resize(usize / sizeof(LZ4TFileBlock));
         memcpy(metadata.data(), buf, usize);
+        
+        progress += csize;
+        lz4t_progress = (double)progress / (double)filesize;
     }
     
     input.seekg(sizeof(int) << 1);
@@ -99,14 +137,17 @@ bool lz4test::decompress(std::istream &input, std::ostream &output)
     for (auto iter = metadata.begin(); iter != metadata.end(); iter++)
     {
         input.read(dat, iter->csize);
-        if (!decompress(dat, iter->csize, buf, iter->usize)) { return false; }
+        if (!lz4t_decompress(dat, iter->csize, buf, iter->usize)) { return false; }
         output.write(buf, iter->usize);
+        
+        progress += iter->csize;
+        lz4t_progress = (double)progress / (double)filesize;
     }
     
     return true;
 }
 
-bool lz4test::compress(const char* data, int usize, char* buf, int& csize)
+bool lz4t_compress(const char* data, int usize, char* buf, int& csize)
 {
     csize = LZ4_compressHC2_limitedOutput(data, buf, usize, usize, 16);
     if (csize <= 0 || csize >= usize)
@@ -118,7 +159,7 @@ bool lz4test::compress(const char* data, int usize, char* buf, int& csize)
     return true;
 }
 
-bool lz4test::decompress(const char* data, int csize, char* buf, int usize)
+bool lz4t_decompress(const char* data, int csize, char* buf, int usize)
 {
     if (csize == usize)
     {

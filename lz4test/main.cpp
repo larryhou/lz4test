@@ -6,29 +6,20 @@
 //
 
 #include "lz4test.hpp"
-#include <fstream>
+#include <string>
 
 int main(int argc, const char * argv[])
 {
     if (argc < 2 + 2) { return 1; }
     
     auto command = argv[1];
-    
-    std::fstream input;
-    input.open(argv[2], std::ios::in);
-    if (!input.good()) { return 2; }
-    
-    std::fstream output;
-    output.open(argv[3], std::ios::out);
-    if (!output.good()) { return 4; }
-    
     if (!strcmp(command, "compress"))
     {
-        if (!lz4test::compress(input, output)) { return 10; }
+        if (!lz4t_compress(argv[2], argv[3])) { return 10; }
     }
     else if (!strcmp(command, "decompress"))
     {
-        if (!lz4test::decompress(input, output)) { return 20; }
+        if (!lz4t_decompress(argv[2], argv[3])) { return 20; }
     }
     
     return 0;

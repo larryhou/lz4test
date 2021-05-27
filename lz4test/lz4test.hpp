@@ -10,21 +10,18 @@
 
 #define FILE_BLOCK_SIZE (32<<10)
 
-#include <iostream>
-
-namespace lz4test {
-
-struct FileBlock
+struct LZ4TFileBlock
 {
     int usize;
     int csize;
 };
 
-bool compress(const char* data, int usize, char* buf, int& csize);
-bool compress(std::istream &input, std::ostream &output);
+extern double lz4t_progress;
 
-bool decompress(const char* data, int csize, char* buf, int usize);
-bool decompress(std::istream &input, std::ostream &output);
+extern "C" {
+
+bool lz4t_decompress(const char* filename, const char *savename);
+bool lz4t_compress(const char* filename, const char *savename);
 
 }
 
