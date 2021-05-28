@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">lz4test</string>
+    <string name="button_decompress">解压</string>
+</resources>

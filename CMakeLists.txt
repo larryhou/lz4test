@@ -12,7 +12,14 @@ endif()
 
 add_subdirectory(external/lz4)
 
-add_library(lz4test lz4test/lz4test.cpp )
+set (LIBRARY_TYPE STATIC)
+if (CMAKE_SYSTEM_NAME STREQUAL "Android")
+    set (LIBRARY_TYPE SHARED)
+elseif (CMAKE_SYSTEM_NAME STREQUAL "iOS")
+    set (CMAKE_OSX_ARCHITECTURES "armv7;armv7s;arm64")
+endif()
+
+add_library(lz4test ${LIBRARY_TYPE} lz4test/lz4test.cpp )
 target_link_libraries(lz4test lz4)
 
 if(NOT CMAKE_SYSTEM_NAME STREQUAL "iOS")

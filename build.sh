@@ -11,11 +11,11 @@ rm -fr ${CMAKE_BUILD_PATH}
 ANDROID_NDK_PATH=${ANDROID_SDK_PATH}/ndk-bundle
 ANDROID_CMAKE_ROOT_PATH=$(find ${ANDROID_SDK_PATH}/cmake -type d -maxdepth 1 -mindepth 1 | tail -n 1)
 
-for abi in arm64-v8a armeabi-v7a
+for abi in arm64-v8a armeabi-v7a # x86_64 x86
 do
     ${ANDROID_CMAKE_ROOT_PATH}/bin/cmake -H${CMAKE_PROJECT_ROOT_PATH} -B${CMAKE_BUILD_PATH}/android/${abi} \
         -DANDROID_ABI=${abi} \
-        -DANDROID_PLATFORM=android-16 \
+        -DANDROID_PLATFORM=android-22 \
         -DANDROID_NDK=${ANDROID_NDK_PATH} \
         -DCMAKE_TOOLCHAIN_FILE=${ANDROID_NDK_PATH}/build/cmake/android.toolchain.cmake \
         -DCMAKE_MAKE_PROGRAM=${ANDROID_CMAKE_ROOT_PATH}/bin/ninja \
