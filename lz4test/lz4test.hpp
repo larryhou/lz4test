@@ -10,12 +10,6 @@
 
 #define FILE_BLOCK_SIZE (32<<10)
 
-struct LZ4TFileBlock
-{
-    int usize;
-    int csize;
-};
-
 extern double lz4t_progress;
 
 extern "C" {

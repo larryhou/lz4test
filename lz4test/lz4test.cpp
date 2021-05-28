@@ -19,6 +19,14 @@ double lz4t_progress = 0.0f;
 bool lz4t_decompress(const char* data, int csize, char* buf, int usize);
 bool lz4t_compress(const char* data, int usize, char* buf, int& csize);
 
+namespace {
+struct LZ4TFileBlock
+{
+    int usize;
+    int csize;
+};
+}
+
 bool lz4t_compress(const char* filename, const char *savename)
 {
     std::fstream input;
