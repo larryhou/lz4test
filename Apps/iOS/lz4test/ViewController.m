@@ -33,7 +33,7 @@ NSTimer* _timer;
     BOOL exist = [[NSFileManager defaultManager] fileExistsAtPath:sample.path];
     NSLog(@"%@ %d", sample, exist);
     
-    NSURL* target = [sample URLByAppendingPathExtension:@".dat"];
+    NSURL* target = [sample URLByAppendingPathExtension:@"dat"];
     
     lz4t_progress = 0.0f;
     [_progressView setProgress: 0.0f];
