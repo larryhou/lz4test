@@ -7,11 +7,6 @@
 
 import UIKit
 
-extension String
-{
-    var cptr: UnsafePointer<Int8>? { (self as NSString).utf8String }
-}
-
 class ViewController: UIViewController
 {
     @IBOutlet weak var progressView: UIProgressView!
@@ -47,7 +42,7 @@ class ViewController: UIViewController
         DispatchQueue.global(qos: .userInitiated).async
         {
             timestamp = Date()
-            success = lz4t_decompress(sample.path.cptr, target.path.cptr) ? 1 : 0
+            success = lz4t_decompress(sample.path, target.path) ? 1 : 0
             print("decompress success = \(success)")
         }
         
