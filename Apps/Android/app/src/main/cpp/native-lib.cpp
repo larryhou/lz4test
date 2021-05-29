@@ -1,9 +1,7 @@
 #include <jni.h>
 #include <string>
 
-extern "C" {
 #include <lz4test.hpp>
-}
 
 
 extern "C" JNIEXPORT jstring JNICALL

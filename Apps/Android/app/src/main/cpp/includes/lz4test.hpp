@@ -12,7 +12,9 @@
 
 extern double lz4t_progress;
 
+extern "C" {
 bool lz4t_decompress(const char* filename, const char *savename);
 bool lz4t_compress(const char* filename, const char *savename);
+}
 
 #endif /* lz4test_hpp */
