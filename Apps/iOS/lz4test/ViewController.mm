@@ -7,7 +7,9 @@
 
 #import "ViewController.h"
 
+extern "C" {
 #import "lz4test.hpp"
+}
 
 @interface ViewController ()
 

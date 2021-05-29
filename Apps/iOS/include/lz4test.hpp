@@ -10,14 +10,11 @@
 
 #define FILE_BLOCK_SIZE (32<<10)
 
-#include <iostream>
-#include <vector>
+#include <stdbool.h>
 
 extern double lz4t_progress;
 
-extern "C" {
 bool lz4t_decompress(const char* filename, const char *savename);
 bool lz4t_compress(const char* filename, const char *savename);
-}
 
 #endif /* lz4test_hpp */
